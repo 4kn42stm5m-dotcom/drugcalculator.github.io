@@ -1,0 +1,238 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>حاسبة الجرعات الطبية الدقيقة</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f0f4f8;
+            color: #1e293b;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .calculator-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.08);
+            width: 100%;
+            max-width: 480px;
+        }
+        h2 {
+            text-align: center;
+            color: #0f172a;
+            margin-top: 0;
+            margin-bottom: 24px;
+            font-size: 1.5rem;
+            border-bottom: 2px solid #e2e8f0;
+            padding-bottom: 12px;
+        }
+        .form-group {
+            margin-bottom: 18px;
+        }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 600;
+            font-size: 0.95rem;
+            color: #334155;
+        }
+        .input-row {
+            display: flex;
+            gap: 10px;
+        }
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            font-size: 1rem;
+            box-sizing: border-box;
+            background-color: #f8fafc;
+        }
+        input:focus, select:focus {
+            outline: none;
+            border-color: #0284c7;
+            background-color: #ffffff;
+        }
+        select {
+            width: 45%;
+            cursor: pointer;
+        }
+        .btn-calc {
+            width: 100%;
+            padding: 14px;
+            background-color: #0284c7;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: background-color 0.2s;
+        }
+        .btn-calc:hover {
+            background-color: #0369a1;
+        }
+        .result-box {
+            margin-top: 24px;
+            padding: 20px;
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            border-radius: 10px;
+            display: none;
+        }
+        .result-box h3 {
+            margin: 0 0 12px 0;
+            color: #0369a1;
+            font-size: 1.1rem;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #cbd5e1;
+            font-size: 1.05rem;
+        }
+        .result-item:last-child {
+            border-bottom: none;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #0f172a;
+            direction: ltr;
+        }
+        .disclaimer {
+            margin-top: 20px;
+            font-size: 0.8rem;
+            color: #64748b;
+            text-align: center;
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+
+<div class="calculator-card">
+    <h2>حاسبة الجرعات الطبية</h2>
+
+    <div class="form-group">
+        <label>1. وزن المريض:</label>
+        <div class="input-row">
+            <input type="number" id="weight" placeholder="أدخل الوزن" step="any" min="0">
+            <select id="weightUnit">
+                <option value="kg">كيلوجرام (kg)</option>
+                <option value="lb">رطل (lb)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>2. الجرعة الموصوفة (لكل كجم من الوزن):</label>
+        <div class="input-row">
+            <input type="number" id="dose" placeholder="مثال: 15" step="any" min="0">
+            <select id="doseUnit">
+                <option value="mg">ملليجرام (mg/kg)</option>
+                <option value="mcg">ميكروجرام (mcg/kg)</option>
+                <option value="g">جرام (g/kg)</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group">
+        <label>3. التكرار اليومي (اختياري - لحساب الجرعة الواحدة):</label>
+        <select id="frequency" style="width: 100%;">
+            <option value="1">جرعة واحدة (أو إجمالي الجرعة اليومية)</option>
+            <option value="2">مرتين يومياً (كل 12 ساعة)</option>
+            <option value="3">3 مرات يومياً (كل 8 ساعات)</option>
+            <option value="4">4 مرات يومياً (كل 6 ساعات)</option>
+        </select>
+    </div>
+
+    <button class="btn-calc" onclick="calculateDosage()">احسب الجرعة</button>
+
+    <div class="result-box" id="resultBox">
+        <h3>نتائج الحساب (للجرعة الواحدة):</h3>
+        <div class="result-item">
+            <span>بالميكروجرام (mcg):</span>
+            <span class="result-value" id="resMcg">-</span>
+        </div>
+        <div class="result-item">
+            <span>بالملليجرام (mg):</span>
+            <span class="result-value" id="resMg">-</span>
+        </div>
+        <div class="result-item">
+            <span>بالجرام (g):</span>
+            <span class="result-value" id="resG">-</span>
+        </div>
+        <div class="result-item" style="margin-top: 8px; color: #0369a1; font-size: 0.9rem;">
+            <span>إجمالي الجرعة اليومية (mg):</span>
+            <span class="result-value" id="resTotalMg">-</span>
+        </div>
+    </div>
+
+    <div class="disclaimer">
+        تنبيه طبي: هذه الأداة مخصصة للمساعدة الحسابية فقط. يجب دائماً مراجعة الجرعات والحد الأقصى المسموح به مع الطبيب أو الصيدلي المختص قبل إعطاء الدواء.
+    </div>
+</div>
+
+<script>
+    function calculateDosage() {
+        const weightInput = parseFloat(document.getElementById('weight').value);
+        const weightUnit = document.getElementById('weightUnit').value;
+        const doseInput = parseFloat(document.getElementById('dose').value);
+        const doseUnit = document.getElementById('doseUnit').value;
+        const frequency = parseInt(document.getElementById('frequency').value);
+
+        if (isNaN(weightInput) || weightInput <= 0 || isNaN(doseInput) || doseInput <= 0) {
+            alert("يرجى إدخال قيم صحيحة وموجبة للوزن والجرعة.");
+            return;
+        }
+
+        // تحويل الوزن إلى كيلوجرام
+        let weightInKg = weightUnit === 'lb' ? weightInput * 0.45359237 : weightInput;
+
+        // تحويل الجرعة إلى ملليجرام لكل كجم كوحدة أساسية
+        let doseInMgPerKg = 0;
+        if (doseUnit === 'g') {
+            doseInMgPerKg = doseInput * 1000;
+        } else if (doseUnit === 'mg') {
+            doseInMgPerKg = doseInput;
+        } else if (doseUnit === 'mcg') {
+            doseInMgPerKg = doseInput / 1000;
+        }
+
+        // حساب الإجمالي اليومي والجرعة الواحدة بالملليجرام
+        let totalDailyMg = weightInKg * doseInMgPerKg;
+        let singleDoseMg = totalDailyMg / frequency;
+
+        // التحويل للوحدات الأخرى
+        let singleDoseMcg = singleDoseMg * 1000;
+        let singleDoseG = singleDoseMg / 1000;
+
+        // عرض النتائج مع تقريب منطقي للأرقام العشرية
+        document.getElementById('resMcg').innerText = formatNumber(singleDoseMcg) + " mcg";
+        document.getElementById('resMg').innerText = formatNumber(singleDoseMg) + " mg";
+        document.getElementById('resG').innerText = formatNumber(singleDoseG) + " g";
+        document.getElementById('resTotalMg').innerText = formatNumber(totalDailyMg) + " mg / day";
+
+        document.getElementById('resultBox').style.display = 'block';
+    }
+
+    function formatNumber(num) {
+        // إزالة الأصفار الزائدة مع الحفاظ على الدقة للكسور الصغيرة (مثل الجرامات)
+        return parseFloat(num.toFixed(6)).toString();
+    }
+</script>
+
+</body>
+</html>
+
